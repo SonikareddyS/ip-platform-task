@@ -1,234 +1,244 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Menu,
   X,
   ArrowRight,
   Server,
-  LifeBuoy
+  Headset,
+  ShieldCheck
 } from 'lucide-react';
 
-export default function Navbar({ onOpenGetStarted, onOpenSupport }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
+export default function Modal({
+  isOpen,
+  type = 'get-started',
+  initialSolution = 'ipv4',
+  onClose
+}) {
+  const [solution, setSolution] = useState(initialSolution);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+    setSolution(initialSolution);
+  }, [initialSolution]);
 
-      const sections = [
-        'hero',
-        'why-ip-store',
-        'ip-solutions',
-        'how-it-works',
-        'faq'
-      ];
+  useEffect(() => {
+    if (!isOpen) return;
 
-      const scrollPosition = window.scrollY + 120;
-
-      for (const sectionId of sections) {
-        const el = document.getElementById(sectionId);
-
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-
-          if (
-            scrollPosition >= top &&
-            scrollPosition < top + height
-          ) {
-            setActiveSection(sectionId);
-            break;
-          }
-        }
-      }
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') onClose();
     };
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
 
-  const navLinks = [
-    { name: 'Home', href: '#hero', id: 'hero' },
-    { name: 'Features', href: '#why-ip-store', id: 'why-ip-store' },
-    { name: 'IP Solutions', href: '#ip-solutions', id: 'ip-solutions' },
-    { name: 'How It Works', href: '#how-it-works', id: 'how-it-works' },
-    { name: 'FAQs', href: '#faq', id: 'faq' },
-  ];
+  if (!isOpen) return null;
 
-  const handleNavClick = (e, href) => {
-    e.preventDefault();
-    setMobileMenuOpen(false);
+  const isSupport = type === 'support';
+  const isLegal = type === 'legal';
 
-    const element = document.querySelector(href);
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-    if (element) {
-      const topOffset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition =
-        elementPosition + window.pageYOffset - topOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
-    }
+    // Frontend demo only: no backend submission is connected.
+    alert(
+      'The form UI is working, but submission is not connected to a backend yet.'
+    );
   };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
-          ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/80 py-3'
-          : 'bg-white/90 backdrop-blur-sm border-b border-slate-100 py-4'
-        }`}
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4"
+      onClick={onClose}
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-5 lg:px-8">
-
-        <div className="flex items-center justify-between gap-2">
-
-          {/* Logo */}
-          <a
-            href="#hero"
-            onClick={(e) => handleNavClick(e, '#hero')}
-            className="flex items-center gap-2 sm:gap-3 shrink-0 group focus:outline-none"
-            aria-label="IP Store Homepage"
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="relative bg-[#172554] px-6 py-7 text-white">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close modal"
+            className="absolute right-4 top-4 rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white"
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#172554] flex items-center justify-center text-white shadow-md shadow-blue-950/20 group-hover:scale-105 transition-transform">
-              <Server className="w-5 h-5 text-[#059669]" />
-            </div>
+            <X className="h-5 w-5" />
+          </button>
 
-            <div className="flex flex-col text-left">
-              <span className="text-lg sm:text-xl font-bold tracking-tight text-[#172554] flex items-center gap-1.5 leading-none">
-                IP Store
-                <span className="w-2 h-2 rounded-full bg-[#059669]"></span>
-              </span>
-
-              <span className="text-[9px] sm:text-[10px] uppercase font-semibold tracking-wider text-slate-500 mt-1 whitespace-nowrap">
-                Static IP Infrastructure
-              </span>
-            </div>
-          </a>
-
-          {/* Navigation Links - Tablet and Desktop */}
-          <nav
-            className="hidden md:flex items-center gap-0.5 lg:gap-1"
-            aria-label="Main Navigation"
-          >
-            {navLinks.map((link) => {
-              const isActive = activeSection === link.id;
-
-              return (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  className={`px-2 lg:px-2.5 xl:px-3 py-2 text-[11px] lg:text-xs xl:text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${isActive
-                      ? 'text-[#172554] bg-slate-100/80 font-semibold'
-                      : 'text-slate-600 hover:text-[#172554] hover:bg-slate-50'
-                    }`}
-                >
-                  {link.name}
-                </a>
-              );
-            })}
-          </nav>
-
-          {/* Action Buttons - Tablet and Desktop */}
-          <div className="hidden md:flex items-center gap-1 lg:gap-2 shrink-0">
-
-            <button
-              type="button"
-              onClick={onOpenSupport}
-              className="inline-flex items-center gap-1 px-1.5 lg:px-2 py-2 text-[11px] lg:text-xs font-medium text-slate-600 hover:text-[#172554] hover:bg-slate-100 rounded-lg whitespace-nowrap transition-colors cursor-pointer"
-            >
-              <LifeBuoy className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-slate-500 shrink-0" />
-              <span>Contact Support</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenGetStarted}
-              className="inline-flex items-center justify-center gap-1 px-2.5 lg:px-3.5 xl:px-5 py-2.5 rounded-lg text-[11px] lg:text-xs xl:text-sm font-semibold text-white bg-[#059669] hover:bg-[#047857] shadow-sm hover:shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 shrink-0" />
-            </button>
-
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/20">
+            {isSupport ? (
+              <Headset className="h-6 w-6 text-emerald-400" />
+            ) : isLegal ? (
+              <ShieldCheck className="h-6 w-6 text-emerald-400" />
+            ) : (
+              <Server className="h-6 w-6 text-emerald-400" />
+            )}
           </div>
 
-          {/* Mobile Hamburger */}
-          <div className="flex md:hidden items-center">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-700 hover:text-[#172554] hover:bg-slate-100 focus:outline-none cursor-pointer"
-              aria-label="Toggle navigation menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen
-                ? <X className="w-6 h-6" />
-                : <Menu className="w-6 h-6" />
-              }
-            </button>
-          </div>
+          <h2
+            id="modal-title"
+            className="text-2xl font-bold"
+          >
+            {isSupport
+              ? 'Contact Support'
+              : isLegal
+                ? 'Legal Information'
+                : 'Get Your Static IP'}
+          </h2>
 
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            {isSupport
+              ? 'Tell us how we can help with your IP infrastructure.'
+              : isLegal
+                ? 'Please review the applicable terms and policies for IP Store.'
+                : 'Get started with dedicated IP infrastructure for your trading setup.'}
+          </p>
         </div>
 
-        {/* Mobile Dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-3 pt-3 pb-4 border-t border-slate-200">
-
-            <div className="flex flex-col space-y-1">
-
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  className={`px-3.5 py-2.5 rounded-lg text-base font-medium transition-colors ${activeSection === link.id
-                      ? 'text-[#172554] bg-slate-100 font-semibold'
-                      : 'text-slate-700 hover:text-[#172554] hover:bg-slate-50'
-                    }`}
-                >
-                  {link.name}
-                </a>
-              ))}
-
-              <div className="pt-3 border-t border-slate-100 flex flex-col gap-2 mt-2">
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenSupport();
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
-                >
-                  <LifeBuoy className="w-4 h-4 text-slate-600" />
-                  <span>Contact Support</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenGetStarted();
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold text-white bg-[#059669] hover:bg-[#047857] shadow-sm transition-colors cursor-pointer"
-                >
-                  <span>Get Started</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-
-              </div>
+        {/* Content */}
+        <div className="p-6">
+          {isLegal ? (
+            <div className="space-y-4 text-sm leading-6 text-slate-600">
+              <p>
+                This section is reserved for the official IP Store
+                terms of service, privacy policy and other legal
+                information.
+              </p>
+              <p>
+                Please add the approved legal content before making
+                this information publicly available.
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full rounded-lg bg-[#172554] px-5 py-3 font-semibold text-white hover:bg-blue-900"
+              >
+                Close
+              </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
 
+              {!isSupport && (
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    Choose your IP solution
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {['ipv4', 'ipv6'].map((item) => (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setSolution(item)}
+                        className={`rounded-xl border p-4 text-left transition ${solution === item
+                            ? 'border-emerald-600 bg-emerald-50 ring-1 ring-emerald-600'
+                            : 'border-slate-200 hover:border-slate-400'
+                          }`}
+                      >
+                        <Server
+                          className={`mb-2 h-5 w-5 ${solution === item
+                              ? 'text-emerald-600'
+                              : 'text-slate-500'
+                            }`}
+                        />
+                        <span className="block font-semibold text-slate-800">
+                          {item.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          Dedicated IP
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  required
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter your phone number"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                />
+              </div>
+
+              {isSupport && (
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    How can we help?
+                  </label>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Describe your query..."
+                    required
+                    rows={3}
+                    className="w-full resize-none rounded-lg border border-slate-300 px-4 py-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#059669] px-5 py-3.5 font-semibold text-white shadow-sm transition hover:bg-[#047857] active:scale-[0.98]"
+              >
+                {isSupport ? 'Submit Support Request' : 'Continue'}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+
+              <p className="text-center text-xs text-slate-400">
+                This is a frontend demonstration. Form submission
+                requires backend integration.
+              </p>
+            </form>
+          )}
+        </div>
       </div>
-    </header>
+    </div>
   );
 }
